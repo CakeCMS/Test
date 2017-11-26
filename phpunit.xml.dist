@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    CakeCMS Test
+
+    This file is part of the of the simple cms based on CakePHP 3.
+    For the full copyright and license information, please view the LICENSE
+    file that was distributed with this source code.
+
+    @package    Test
+    @license    MIT
+    @copyright  MIT License http://www.opensource.org/licenses/mit-license.php
+    @link       https://github.com/CakeCMS/Test
+-->
+<phpunit bootstrap="./tests/bootstrap.php"
+         colors="true"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         processIsolation="false"
+         syntaxCheck="true"
+         stopOnError="true"
+         stopOnFailure="true"
+         stopOnIncomplete="true"
+         stopOnSkipped="false"
+         stopOnRisky="false"
+         verbose="false"
+>
+
+    <testsuites>
+        <testsuite name="General">
+            <directory suffix="Test.php">./tests/TestCase</directory>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">./src</directory>
+        </whitelist>
+    </filter>
+
+    <listeners>
+        <listener
+                class="\Cake\TestSuite\Fixture\FixtureInjector"
+                file="./vendor/cakephp/cakephp/src/TestSuite/Fixture/FixtureInjector.php">
+            <arguments>
+                <object class="\Cake\TestSuite\Fixture\FixtureManager" />
+            </arguments>
+        </listener>
+    </listeners>
+
+    <logging>
+        <log type="coverage-clover" target="build/logs/clover.xml"/>
+        <log type="coverage-html" target="build/phpunit" lowUpperBound="80" highLowerBound="95"/>
+        <log type="coverage-text" target="php://stdout" showUncoveredFiles="false" showOnlySummary="true"/>
+    </logging>
+
+</phpunit>

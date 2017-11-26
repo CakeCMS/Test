@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    CakeCMS Test
+
+    This file is part of the of the simple cms based on CakePHP 3.
+    For the full copyright and license information, please view the LICENSE
+    file that was distributed with this source code.
+
+    @package    Test
+    @license    MIT
+    @copyright  MIT License http://www.opensource.org/licenses/mit-license.php
+    @link       https://github.com/CakeCMS/Test
+-->
+<ruleset name="CakeCMS">
+    <description>The CakeCMS coding standard (PSR2 + minor fixes).</description>
+
+    <arg name="tab-width" value="4"/>
+    <arg name="report-width" value="160"/>
+    <arg name="encoding" value="utf-8"/>
+
+    <exclude-pattern type="relative">tests/*</exclude-pattern>
+    <exclude-pattern type="relative">composer-cleanup</exclude-pattern>
+    
+    <exclude-pattern type="relative">vendor</exclude-pattern>
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+
+    <!-- User PSR2(+PSR1) code standarts -->
+    <rule ref="PSR2">
+        <exclude name="PSR1.Methods.CamelCapsMethodName"/>
+        <exclude name="PSR2.Classes.PropertyDeclaration"/>
+        <exclude name="PSR2.Methods.MethodDeclaration"/>
+        <exclude name="PEAR.NamingConventions.ValidVariableName"/>
+        <exclude name="PEAR.NamingConventions.ValidFunctionName"/>
+        <exclude name="Squiz.WhiteSpace.ControlStructureSpacing"/> <!-- but LineAfterClose, NoLineAfterClose -->
+    </rule>
+
+    <!-- Max line length is 120 chars -->
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="120"/>
+            <property name="absoluteLineLimit" value="120"/>
+        </properties>
+    </rule>
+
+    <!--
+        Overload excluded from PSR2 tests.
+        private/protected method/variables must be prefixed with an underscore
+    -->
+    <rule ref="CakeCMS.Classes.PropertyDeclaration"/>
+    <rule ref="CakeCMS.Methods.CamelCapsMethodName"/>
+    <rule ref="CakeCMS.Methods.MethodDeclaration"/>
+    <rule ref="CakeCMS.NamingConventions.ValidVariableName"/>
+    <rule ref="CakeCMS.NamingConventions.ValidFunctionName"/>
+    <rule ref="Squiz.WhiteSpace.ControlStructureSpacing.LineAfterClose"/>
+    <rule ref="Squiz.WhiteSpace.ControlStructureSpacing.NoLineAfterClose"/>
+
+</ruleset>

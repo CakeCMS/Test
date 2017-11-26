@@ -13,7 +13,6 @@
  * @author      Sergey Kalistratov <kalistratov.s.m@gmail.com>
  */
 
-use Core\Cms;
 use Cake\Mailer\Email;
 use Cake\Core\Configure;
 use Cake\Routing\DispatcherFactory;
@@ -51,7 +50,7 @@ if (!getenv('db_dsn')) {
 
 ConnectionManager::setConfig('test', [
     'timezone' => 'UTC',
-    'url'      => getenv('db_dsn'),
+    'url'      => getenv('db_dsn')
 ]);
 
 Email::setConfig(Configure::consume('Email'));
@@ -59,5 +58,3 @@ Email::setConfigTransport(Configure::consume('EmailTransport'));
 
 DispatcherFactory::add('Routing');
 DispatcherFactory::add('ControllerFactory');
-
-Cms::getInstance();

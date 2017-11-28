@@ -15,11 +15,12 @@
     },
     "require-dev"  : {
         "jbzoo/phpunit"            : "~2.1",
-        "psy/psysh"                : "@stable",
         "cake-cms/backend"         : "~1.0",
         "cakephp/bake"             : "~1.1",
+         "cake-cms/core"           : "~1.1",
+        "satooshi/php-coveralls"   : "^1.0.2",
         "cakephp/plugin-installer" : "^0.0.15",
-        "satooshi/php-coveralls"   : "^1.0.2"
+        "psy/psysh"                : "@stable"
     },
     "autoload"     : {
         "psr-4" : {

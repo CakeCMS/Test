@@ -16,7 +16,9 @@
 namespace Test\Cases;
 
 use Core\Plugin;
+use JBZoo\Utils\Arr;
 use Cake\Cache\Cache;
+use Cake\Utility\Text;
 use Cake\Utility\Hash;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\IntegrationTestCase as CakeIntegrationTestCase;
@@ -28,13 +30,6 @@ use Cake\TestSuite\IntegrationTestCase as CakeIntegrationTestCase;
  */
 class IntegrationTestCase extends CakeIntegrationTestCase
 {
-
-    /**
-     * Default plugin.
-     *
-     * @var string
-     */
-    protected $_plugin = 'Core';
 
     /**
      * Core plugin.
@@ -49,6 +44,13 @@ class IntegrationTestCase extends CakeIntegrationTestCase
      * @var null|string
      */
     protected $_defaultTable;
+
+    /**
+     * Default plugin.
+     *
+     * @var string
+     */
+    protected $_plugin = 'Core';
 
     /**
      * Default url.
@@ -116,14 +118,38 @@ class IntegrationTestCase extends CakeIntegrationTestCase
     }
 
     /**
-     * Prepare url.
+     * Add the CSRF and Security Component tokens if necessary.
      *
-     * @param array $url
-     * @return array
+     * @param string $url The URL the form is being submitted on.
+     * @param array $data The request body data.
+     * @return array The request body with tokens added.
      */
-    protected function _getUrl(array $url = [])
+    protected function _addTokens($url, $data)
     {
-        return Hash::merge($this->_url, $url);
+        if ($this->_securityToken === true) {
+            if (Arr::key('action', $data)) {
+                unset($data['action']);
+            }
+
+            $keys = array_map(function ($field) {
+                return preg_replace('/(\.\d+)+$/', '', $field);
+            }, array_keys(Hash::flatten($data)));
+            $tokenData = $this->_buildFieldToken($url, array_unique($keys));
+            $data['_Token'] = $tokenData;
+            $data['_Token']['debug'] = 'SecurityComponent debug data would be added here';
+        }
+
+        if ($this->_csrfToken === true) {
+            if (!Arr::key('csrfToken', $this->_cookie)) {
+                $this->_cookie['csrfToken'] = Text::uuid();
+            }
+
+            if (!Arr::key('_csrfToken', $data)) {
+                $data['_csrfToken'] = $this->_cookie['csrfToken'];
+            }
+        }
+
+        return $data;
     }
 
     /**
@@ -136,5 +162,16 @@ class IntegrationTestCase extends CakeIntegrationTestCase
     {
         $tableName = ($name === null) ? $this->_defaultTable : $name;
         return TableRegistry::get($this->_corePlugin . '.' . $tableName);
+    }
+
+    /**
+     * Prepare url.
+     *
+     * @param array $url
+     * @return array
+     */
+    protected function _getUrl(array $url = [])
+    {
+        return Hash::merge($this->_url, $url);
     }
 }

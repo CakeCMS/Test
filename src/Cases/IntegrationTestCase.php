@@ -21,6 +21,7 @@ use Cake\Cache\Cache;
 use Cake\Utility\Text;
 use Cake\Utility\Hash;
 use Cake\ORM\TableRegistry;
+use Core\Controller\AppController;
 use Cake\TestSuite\IntegrationTestCase as CakeIntegrationTestCase;
 
 /**
@@ -53,6 +54,20 @@ class IntegrationTestCase extends CakeIntegrationTestCase
     protected $_plugin = 'Core';
 
     /**
+     * Remove action value fron request data.
+     *
+     * @var bool
+     */
+    protected $_removeDataAction = false;
+
+    /**
+     * Disable controller components.
+     *
+     * @var array
+     */
+    protected $_unloadComponents = ['Security'];
+
+    /**
      * Default url.
      *
      * @var array
@@ -62,6 +77,25 @@ class IntegrationTestCase extends CakeIntegrationTestCase
         'plugin' => 'Core',
         'action' => ''
     ];
+
+    /**
+     * Adds additional event spies to the controller/view event manager.
+     *
+     * @param \Cake\Event\Event $event
+     * @param AppController|null $controller
+     */
+    public function controllerSpy($event, $controller = null)
+    {
+        if ($controller !== null) {
+            if (count($this->_unloadComponents)) {
+                foreach ($this->_unloadComponents as $componentName) {
+                    $controller->components()->unload($componentName);
+                }
+            }
+        }
+
+        parent::controllerSpy($event, $controller);
+    }
 
     /**
      * Setup the test case, backup the static object values so they can be restored.
@@ -127,10 +161,7 @@ class IntegrationTestCase extends CakeIntegrationTestCase
     protected function _addTokens($url, $data)
     {
         if ($this->_securityToken === true) {
-            if (Arr::key('action', $data)) {
-                unset($data['action']);
-            }
-
+            $data = $this->_removeActionData($data);
             $keys = array_map(function ($field) {
                 return preg_replace('/(\.\d+)+$/', '', $field);
             }, array_keys(Hash::flatten($data)));
@@ -139,6 +170,19 @@ class IntegrationTestCase extends CakeIntegrationTestCase
             $data['_Token']['debug'] = 'SecurityComponent debug data would be added here';
         }
 
+        $data = $this->_setCsrfToken($data);
+
+        return $data;
+    }
+
+    /**
+     * Setup csrf token for data.
+     *
+     * @param array $data
+     * @return array
+     */
+    protected function _setCsrfToken(array $data)
+    {
         if ($this->_csrfToken === true) {
             if (!Arr::key('csrfToken', $this->_cookie)) {
                 $this->_cookie['csrfToken'] = Text::uuid();
@@ -153,15 +197,20 @@ class IntegrationTestCase extends CakeIntegrationTestCase
     }
 
     /**
-     * Get table object.
+     * Remove action value from data.
      *
-     * @param null|string $name
-     * @return \Cake\ORM\Table
+     * @param array $data
+     * @return array
      */
-    protected function _getTable($name = null)
+    protected function _removeActionData(array $data)
     {
-        $tableName = ($name === null) ? $this->_defaultTable : $name;
-        return TableRegistry::get($this->_corePlugin . '.' . $tableName);
+        if ($this->_removeDataAction === true) {
+            if (Arr::key('action', $data)) {
+                unset($data['action']);
+            }
+        }
+
+        return $data;
     }
 
     /**
@@ -173,5 +222,17 @@ class IntegrationTestCase extends CakeIntegrationTestCase
     protected function _getUrl(array $url = [])
     {
         return Hash::merge($this->_url, $url);
+    }
+
+    /**
+     * Get table object.
+     *
+     * @param null|string $name
+     * @return \Cake\ORM\Table
+     */
+    protected function _getTable($name = null)
+    {
+        $tableName = ($name === null) ? $this->_defaultTable : $name;
+        return TableRegistry::get($this->_corePlugin . '.' . $tableName);
     }
 }

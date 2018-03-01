@@ -81,8 +81,8 @@ class IntegrationTestCase extends CakeIntegrationTestCase
     /**
      * Adds additional event spies to the controller/view event manager.
      *
-     * @param \Cake\Event\Event $event
-     * @param AppController|null $controller
+     * @param   \Cake\Event\Event $event
+     * @param   AppController|null $controller
      */
     public function controllerSpy($event, $controller = null)
     {
@@ -98,11 +98,50 @@ class IntegrationTestCase extends CakeIntegrationTestCase
     }
 
     /**
+     * Calling this method will add a CSRF token to the request.
+     *
+     * Both the POST data and cookie will be populated when this option
+     * is enabled. The default parameter names will be used.
+     *
+     * @return  $this
+     */
+    public function enableCsrfToken()
+    {
+        $this->_csrfToken = true;
+        return $this;
+    }
+
+    /**
+     * Calling this method will re-store flash messages into the test session
+     * after being removed by the FlashHelper
+     *
+     * @return  $this
+     */
+    public function enableRetainFlashMessages()
+    {
+        $this->_retainFlashMessages = true;
+        return $this;
+    }
+
+    /**
+     * Calling this method will enable a SecurityComponent
+     * compatible token to be added to request data. This
+     * lets you easily test actions protected by SecurityComponent.
+     *
+     * @return  $this
+     */
+    public function enableSecurityToken()
+    {
+        $this->_securityToken = true;
+        return $this;
+    }
+
+    /**
      * Setup the test case, backup the static object values so they can be restored.
      * Specifically backs up the contents of Configure and paths in App if they have
      * not already been backed up.
      *
-     * @return void
+     * @return  void
      */
     public function setUp()
     {
@@ -136,7 +175,7 @@ class IntegrationTestCase extends CakeIntegrationTestCase
     /**
      * Clears the state used for requests.
      *
-     * @return void
+     * @return  void
      */
     public function tearDown()
     {
@@ -154,9 +193,9 @@ class IntegrationTestCase extends CakeIntegrationTestCase
     /**
      * Add the CSRF and Security Component tokens if necessary.
      *
-     * @param string $url The URL the form is being submitted on.
-     * @param array $data The request body data.
-     * @return array The request body with tokens added.
+     * @param   string $url The URL the form is being submitted on.
+     * @param   array $data The request body data.
+     * @return  array The request body with tokens added.
      */
     protected function _addTokens($url, $data)
     {
@@ -176,10 +215,50 @@ class IntegrationTestCase extends CakeIntegrationTestCase
     }
 
     /**
+     * Get table object.
+     *
+     * @param   null|string $name
+     * @return  \Cake\ORM\Table
+     */
+    protected function _getTable($name = null)
+    {
+        $tableName = ($name === null) ? $this->_defaultTable : $name;
+        return TableRegistry::get($this->_corePlugin . '.' . $tableName);
+    }
+
+    /**
+     * Prepare url.
+     *
+     * @param   array $url
+     * @return  array
+     */
+    protected function _getUrl(array $url = [])
+    {
+        return Hash::merge($this->_url, $url);
+    }
+
+    /**
+     * Remove action value from data.
+     *
+     * @param   array $data
+     * @return  array
+     */
+    protected function _removeActionData(array $data)
+    {
+        if ($this->_removeDataAction === true) {
+            if (Arr::key('action', $data)) {
+                unset($data['action']);
+            }
+        }
+
+        return $data;
+    }
+
+    /**
      * Setup csrf token for data.
      *
-     * @param array $data
-     * @return array
+     * @param   array $data
+     * @return  array
      */
     protected function _setCsrfToken(array $data)
     {
@@ -194,45 +273,5 @@ class IntegrationTestCase extends CakeIntegrationTestCase
         }
 
         return $data;
-    }
-
-    /**
-     * Remove action value from data.
-     *
-     * @param array $data
-     * @return array
-     */
-    protected function _removeActionData(array $data)
-    {
-        if ($this->_removeDataAction === true) {
-            if (Arr::key('action', $data)) {
-                unset($data['action']);
-            }
-        }
-
-        return $data;
-    }
-
-    /**
-     * Prepare url.
-     *
-     * @param array $url
-     * @return array
-     */
-    protected function _getUrl(array $url = [])
-    {
-        return Hash::merge($this->_url, $url);
-    }
-
-    /**
-     * Get table object.
-     *
-     * @param null|string $name
-     * @return \Cake\ORM\Table
-     */
-    protected function _getTable($name = null)
-    {
-        $tableName = ($name === null) ? $this->_defaultTable : $name;
-        return TableRegistry::get($this->_corePlugin . '.' . $tableName);
     }
 }

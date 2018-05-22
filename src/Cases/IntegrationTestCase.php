@@ -86,6 +86,11 @@ class IntegrationTestCase extends CakeIntegrationTestCase
      */
     public function controllerSpy($event, $controller = null)
     {
+        if (!$controller) {
+            /** @var \Cake\Controller\Controller $controller */
+            $controller = $event->getSubject();
+        }
+
         if ($controller !== null) {
             if (count($this->_unloadComponents)) {
                 foreach ($this->_unloadComponents as $componentName) {

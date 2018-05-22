@@ -63,7 +63,7 @@ class TestCase extends CakeTestCase
      * Specifically backs up the contents of Configure and paths in App if they have
      * not already been backed up.
      *
-     * @return void
+     * @return  void
      */
     public function setUp()
     {
@@ -97,7 +97,7 @@ class TestCase extends CakeTestCase
     /**
      * Clears the state used for requests.
      *
-     * @return void
+     * @return  void
      */
     public function tearDown()
     {
@@ -112,7 +112,7 @@ class TestCase extends CakeTestCase
     /**
      * Assert check is empty array.
      *
-     * @param array $array
+     * @param   array $array
      */
     public static function assertIsEmptyArray(array $array)
     {
@@ -122,9 +122,9 @@ class TestCase extends CakeTestCase
     /**
      * Check error validation.
      *
-     * @param mixed $field
-     * @param mixed $value
-     * @param array $errorExpected
+     * @param   mixed $field
+     * @param   mixed $value
+     * @param   array $errorExpected
      */
     public function assertFieldErrorValidation($field, $value, array $errorExpected = [])
     {
@@ -141,18 +141,18 @@ class TestCase extends CakeTestCase
     /**
      * Get table object.
      *
-     * @param null|string $name
-     * @return \Cake\ORM\Table
+     * @param   null|string $name
+     * @return  \Cake\ORM\Table
      */
     protected function _getTable($name = null)
     {
         $tableName = ($name === null) ? $this->_defaultTable : $name;
-        return TableRegistry::get($this->_corePlugin . '.' . $tableName);
+        return TableRegistry::getTableLocator()->get($this->_corePlugin . '.' . $tableName);
     }
 
     /**
-     * @param string $string
-     * @return array
+     * @param   string $string
+     * @return  array
      */
     protected function _getStrArray($string)
     {

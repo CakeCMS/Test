@@ -228,7 +228,7 @@ class IntegrationTestCase extends CakeIntegrationTestCase
     protected function _getTable($name = null)
     {
         $tableName = ($name === null) ? $this->_defaultTable : $name;
-        return TableRegistry::get($this->_corePlugin . '.' . $tableName);
+        return TableRegistry::getTableLocator()->get($this->_corePlugin . '.' . $tableName);
     }
 
     /**

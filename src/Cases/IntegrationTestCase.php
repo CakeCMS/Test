@@ -22,15 +22,17 @@ use Cake\Utility\Text;
 use Cake\Utility\Hash;
 use Cake\ORM\TableRegistry;
 use Core\Controller\AppController;
-use Cake\TestSuite\IntegrationTestCase as CakeIntegrationTestCase;
+use Cake\TestSuite\IntegrationTestTrait;
 
 /**
  * Class IntegrationTestCase
  *
  * @package Test\Cases
  */
-class IntegrationTestCase extends CakeIntegrationTestCase
+class IntegrationTestCase extends \Cake\TestSuite\TestCase
 {
+
+    use IntegrationTestTrait;
 
     /**
      * Core plugin.
@@ -99,7 +101,23 @@ class IntegrationTestCase extends CakeIntegrationTestCase
             }
         }
 
-        parent::controllerSpy($event, $controller);
+        if (!$controller) {
+            /** @var \Cake\Controller\Controller $controller */
+            $controller = $event->getSubject();
+        }
+        $this->_controller = $controller;
+        $events = $controller->getEventManager();
+        $events->on('View.beforeRender', function ($event, $viewFile) use ($controller) {
+            if (!$this->_viewName) {
+                $this->_viewName = $viewFile;
+            }
+            if ($this->_retainFlashMessages) {
+                $this->_flashMessages = $controller->getRequest()->getSession()->read('Flash');
+            }
+        });
+        $events->on('View.beforeLayout', function ($event, $viewFile) {
+            $this->_layoutName = $viewFile;
+        });
     }
 
     /**
@@ -151,30 +169,6 @@ class IntegrationTestCase extends CakeIntegrationTestCase
     public function setUp()
     {
         parent::setUp();
-
-        if (!Plugin::loaded($this->_corePlugin)) {
-            $loadParams = [
-                'bootstrap' => true,
-                'routes'    => true,
-                'path'      => ROOT . DS
-            ];
-
-            Plugin::load($this->_corePlugin, $loadParams);
-            Plugin::routes($this->_corePlugin);
-        }
-
-        if ($this->_plugin !== $this->_corePlugin) {
-            $options = [
-                'bootstrap' => true,
-                'routes'    => true,
-                'autoload'  => true
-            ];
-
-            Plugin::load($this->_plugin, $options);
-            Plugin::routes($this->_plugin);
-
-            $this->_url['plugin'] = $this->_plugin;
-        }
     }
 
     /**
@@ -185,12 +179,6 @@ class IntegrationTestCase extends CakeIntegrationTestCase
     public function tearDown()
     {
         parent::tearDown();
-
-        Plugin::unload($this->_corePlugin);
-        if ($this->_plugin !== $this->_corePlugin) {
-            Plugin::unload($this->_plugin);
-        }
-
         Cache::drop('test_cached');
         unset($this->_url);
     }

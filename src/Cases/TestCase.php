@@ -15,48 +15,40 @@
 
 namespace Test\Cases;
 
-use Core\Cms;
-use Core\Plugin;
 use JBZoo\Utils\Str;
 use Cake\Cache\Cache;
+use Cake\Routing\Router;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\TestCase as CakeTestCase;
 
 /**
  * Class TestCase
  *
- * @package Test\Cases
+ * @package     Test\Cases
  */
 class TestCase extends CakeTestCase
 {
 
     /**
-     * Default plugin name.
-     *
-     * @var string
-     */
-    protected $_plugin = 'Core';
-
-    /**
-     * Core plugin.
-     *
-     * @var string
-     */
-    protected $_corePlugin = 'Core';
-
-    /**
      * Default table name.
      *
-     * @var null|string
+     * @var     null|string
      */
     protected $_defaultTable;
 
     /**
-     * Hold CMS object.
+     * List of need load plugins.
      *
-     * @var Cms
+     * @var     array
      */
-    protected $_cms;
+    protected $_loadPlugins = [];
+
+    /**
+     * Core plugin name.
+     *
+     * @var     string
+     */
+    private $_corePlugin = 'Core';
 
     /**
      * Setup the test case, backup the static object values so they can be restored.
@@ -68,30 +60,40 @@ class TestCase extends CakeTestCase
     public function setUp()
     {
         parent::setUp();
+        $this->loadPlugins(array_merge($this->_loadPlugins, [$this->_corePlugin]));
+    }
 
-        if ($this->_plugin !== $this->_corePlugin) {
-            $options = [
-                'bootstrap' => true,
-                'routes'    => true,
-                'autoload'  => true
-            ];
+    /**
+     * Load plugins into a simulated application.
+     *
+     * Useful to test how plugins being loaded/not loaded interact with other
+     * elements in CakePHP or applications.
+     *
+     * @param   array $plugins List of Plugins to load.
+     *
+     * @return  \Cake\Http\BaseApplication
+     */
+    public function loadPlugins(array $plugins = [])
+    {
+        /** @var \Cake\Http\BaseApplication $app */
+        $app = $this->getMockForAbstractClass(
+            'TestApp\\Application',
+            ['']
+        );
 
-            Plugin::load($this->_plugin, $options);
-            Plugin::routes($this->_plugin);
+        foreach ($plugins as $pluginName => $config) {
+            if (is_array($config)) {
+                $app->addPlugin($pluginName, $config);
+            } else {
+                $app->addPlugin($config);
+            }
         }
 
-        if (!Plugin::loaded($this->_corePlugin)) {
-            $loadParams = [
-                'bootstrap' => true,
-                'routes'    => true,
-                'path'      => ROOT . DS
-            ];
+        $app->pluginBootstrap();
+        $builder = Router::createRouteBuilder('/');
+        $app->pluginRoutes($builder);
 
-            Plugin::load($this->_corePlugin, $loadParams);
-            Plugin::routes($this->_corePlugin);
-        }
-
-        $this->_cms = Cms::getInstance();
+        return $app;
     }
 
     /**
@@ -102,10 +104,6 @@ class TestCase extends CakeTestCase
     public function tearDown()
     {
         parent::tearDown();
-        Plugin::unload($this->_corePlugin);
-        if ($this->_plugin !== $this->_corePlugin) {
-            Plugin::unload($this->_plugin);
-        }
         Cache::drop('test_cached');
     }
 
@@ -113,6 +111,8 @@ class TestCase extends CakeTestCase
      * Assert check is empty array.
      *
      * @param   array $array
+     *
+     * @return  void
      */
     public static function assertIsEmptyArray(array $array)
     {
@@ -125,6 +125,8 @@ class TestCase extends CakeTestCase
      * @param   mixed $field
      * @param   mixed $value
      * @param   array $errorExpected
+     *
+     * @return  void
      */
     public function assertFieldErrorValidation($field, $value, array $errorExpected = [])
     {
@@ -142,15 +144,17 @@ class TestCase extends CakeTestCase
      * Get table object.
      *
      * @param   null|string $name
+     *
      * @return  \Cake\ORM\Table
      */
     protected function _getTable($name = null)
     {
-        $tableName = ($name === null) ? $this->_defaultTable : $name;
-        return TableRegistry::getTableLocator()->get($this->_corePlugin . '.' . $tableName);
+        return TableRegistry::getTableLocator()->get($name);
     }
 
     /**
+     * Get string from array.
+     *
      * @param   string $string
      * @return  array
      */
@@ -158,6 +162,7 @@ class TestCase extends CakeTestCase
     {
         $output  = [];
         $details = explode("\n", $string);
+
         foreach ($details as $string) {
             $string   = Str::trim($string);
             $output[] = $string;

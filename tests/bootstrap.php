@@ -53,8 +53,7 @@ ConnectionManager::setConfig('test', [
     'url'      => getenv('db_dsn')
 ]);
 
-Email::setConfig(Configure::consume('Email'));
-Email::setConfigTransport(Configure::consume('EmailTransport'));
+Email::setConfig(Configure::consume('EmailTransport'));
 
 DispatcherFactory::add('Routing');
 DispatcherFactory::add('ControllerFactory');
